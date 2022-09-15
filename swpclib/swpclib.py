@@ -8,8 +8,28 @@ class Runner:
     def __init__(self):
         self.base_url = base_url
 
+    def get(self, url):
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as errh:
+            print("An Http Error occurred:" + repr(errh))
+            raise
+        except requests.exceptions.ConnectionError as errc:
+            print("An Error Connecting to the API occurred:" + repr(errc))
+            raise
+        except requests.exceptions.Timeout as errt:
+            print("A Timeout Error occurred:" + repr(errt))
+            raise
+        except requests.exceptions.RequestException as err:
+            print("An Unknown Error occurred" + repr(err))
+            raise
+
+        return response.json()
+
     def get_sfi(self, start=0, end=1, step=1):
-        response = requests.get(base_url + "f107_cm_flux.json").json()
+        # get solar flux index
+        response = self.get(self.base_url + "f107_cm_flux.json")
         data_range = slice(start, end, step)
         sfi_data = [
             {
@@ -22,7 +42,8 @@ class Runner:
         return sfi_data
 
     def get_ki(self, start=0, end=1, step=1):
-        response = requests.get(base_url + "boulder_k_index_1m.json").json()
+        # get boulder K index
+        response = self.get(self.base_url + "boulder_k_index_1m.json")
         data_range = slice(start, end, step)
         ki_data = [
             {
@@ -35,9 +56,10 @@ class Runner:
         return ki_data
 
     def get_ssn(self, start=0, end=1, step=1):
-        response = requests.get(
-            base_url + "solar-cycle/sunspots-smoothed.json"
-        ).json()
+        # get smoothed sunspot number
+        response = self.get(
+            self.base_url + "solar-cycle/sunspots-smoothed.json"
+        )
         data_range = slice(start, end, step)
         ssn_data = [
             {
@@ -61,7 +83,8 @@ class Runner:
         return ssn_data
 
     def get_kp(self, start=0, end=1, step=1):
-        response = requests.get(base_url + "planetary_k_index_1m.json").json()
+        # get planetary k index
+        response = self.get(self.base_url + "planetary_k_index_1m.json")
         data_range = slice(start, end, step)
         kp_data = [
             {
@@ -74,17 +97,29 @@ class Runner:
         return kp_data
 
     def get_probabilities(self, start=0, end=1, step=1):
-        response = requests.get(base_url + "solar_probabilities.json").json()
+        # get solar event probabilities
+        response = self.get(self.base_url + "solar_probabilities.json")
         data_range = slice(start, end, step)
         probabilities_data = [item for item in response[data_range]]
 
         return probabilities_data
 
+    def get_standard(self):
+        out = {
+            "sfi": self.get_sfi()[0]["sfi"],
+            "ki": self.get_ki()[0]["k_index"],
+            "kp": self.get_kp()[0]["kp_index"],
+        }
+
+        ssn = self.get_ssn()
+        if ssn[0]["last_ssn"]:
+            out["ssn"] = ssn[0]["last_ssn"]["smoothed_ssn"]
+        else:
+            out["ssn"] = ssn[0]["smoothed_ssn"]
+
+        return out
+
 
 if __name__ == "__main__":
     swpc = Runner()
-    #    print(swpc.get_sfi())
-    #    print(swpc.get_ki())
-    #    print(swpc.get_kp())
-    print(swpc.get_probabilities())
-    print(swpc.get_ssn())
+    print(swpc.get_standard())
