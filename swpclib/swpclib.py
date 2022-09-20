@@ -62,7 +62,7 @@ class Runner:
                 ]
                 if ssn_data[0]["smoothed_ssn"] == -1:
                     last = -1
-                    for item in response:
+                    for item in data:
                         last = item["smoothed_ssn"]
                         last_timestamp = item["time-tag"]
                         if last != -1:
