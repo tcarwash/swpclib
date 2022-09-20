@@ -17,13 +17,13 @@ class Runner:
             ) as response:
                 data = await response.json()
                 data_range = slice(start, end, step)
-                sfi_data = [
-                    {
+                sfi_data = {
+                    "sfi_data": {
                         "sfi": float(item["flux"]),
                         "timestamp": item["time_tag"],
                     }
                     for item in data[data_range]
-                ]
+                }
 
         return sfi_data
 
@@ -35,13 +35,13 @@ class Runner:
             ) as response:
                 data = await response.json()
                 data_range = slice(start, end, step)
-                ki_data = [
-                    {
+                ki_data = {
+                    "k_index_data": {
                         "k_index": float(item["k_index"]),
                         "timestamp": item["time_tag"],
                     }
                     for item in data[data_range]
-                ]
+                }
 
         return ki_data
 
@@ -53,21 +53,21 @@ class Runner:
             ) as response:
                 data = await response.json()
                 data_range = slice(start, end, step)
-                ssn_data = [
-                    {
+                ssn_data = {
+                    "smoothed_ssn_data": {
                         "smoothed_ssn": float(item["smoothed_ssn"]),
                         "timestamp": item["time-tag"],
                     }
                     for item in data[data_range]
-                ]
-                if ssn_data[0]["smoothed_ssn"] == -1:
+                }
+                if ssn_data["smoothed_ssn_data"]["smoothed_ssn"] == -1:
                     last = -1
                     for item in data:
                         last = item["smoothed_ssn"]
                         last_timestamp = item["time-tag"]
                         if last != -1:
                             break
-                    ssn_data[0]["last_ssn"] = {
+                    ssn_data["smoothed_ssn_data"]["last_ssn"] = {
                         "smoothed_ssn": last,
                         "timestamp": last_timestamp,
                     }
@@ -82,13 +82,13 @@ class Runner:
             ) as response:
                 data = await response.json()
                 data_range = slice(start, end, step)
-                kp_data = [
-                    {
+                kp_data = {
+                    "kp_index_data": {
                         "kp_index": float(item["kp_index"]),
                         "timestamp": item["time_tag"],
                     }
                     for item in data[data_range]
-                ]
+                }
 
         return kp_data
 
@@ -100,11 +100,26 @@ class Runner:
             ) as response:
                 data = await response.json()
                 data_range = slice(start, end, step)
-                probabilities_data = [item for item in data[data_range]]
+                probabilities_data = {
+                    "probabilities_data": [item for item in data[data_range]]
+                }
 
         return probabilities_data
+
+    async def get_standard(self, start=0, end=1, step=1):
+        standard_group = await asyncio.gather(
+            self.get_sfi(),
+            self.get_kp(),
+            self.get_probabilities(),
+            self.get_ssn(),
+        )
+        data = {}
+        for _dict in standard_group:
+            data.update(_dict)
+
+        return data
 
 
 if __name__ == "__main__":
     swpc = Runner()
-    print(asyncio.run(swpc.get_sfi()))
+    print(asyncio.run(swpc.get_standard()))
