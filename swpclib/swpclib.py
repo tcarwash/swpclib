@@ -108,5 +108,3 @@ class Runner:
 if __name__ == "__main__":
     swpc = Runner()
     print(asyncio.run(swpc.get_sfi()))
-    print(asyncio.run(swpc.get_ki()))
-    print(asyncio.run(swpc.get_probabilities()))
