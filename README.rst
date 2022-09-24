@@ -17,8 +17,7 @@ swpclib
 
 
 
-A library to interact with NOAA's Space Weather API, A supporting library for my home assistant integration
-
+A library to interact with NOAA's Space Weather API
 
 * Free software: MIT license
 * Documentation: https://swpclib.readthedocs.io.
