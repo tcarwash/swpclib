@@ -1,4 +1,4 @@
-#swpclib
+# swpclib
 
 
 
@@ -8,10 +8,10 @@ A library to interact with NOAA's Space Weather API
 - Documentation: https://swpclib.readthedocs.io.
 
 
-##Features
+## Features
 
 - TODO
 
-##Credits
+## Credits
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
