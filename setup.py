@@ -15,5 +15,6 @@ if __name__ == "__main__":
         setup_requires=["setuptools-git-versioning"],
         test_suite="test",
         tests_require=test_requirements,
+        install_requires=["aiohttp==3.8.3"],
         name="swpclib",
     )
