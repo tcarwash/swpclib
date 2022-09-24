@@ -21,6 +21,7 @@ def main():
 
     SFI: {data['sfi_data']['sfi']}
     KP Index: {data['kp_index_data']['kp_index']}
+    A Index: {data['a_index_data']['a_index']}
     Sunspot Number: {adjusted_ssn}
     X-Class Probability: {data['probabilities_data'][0]['x_class_1_day']}\n\nVia NOAA Space Weather Prediction Center
     """
