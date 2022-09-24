@@ -45,6 +45,26 @@ class Runner:
 
         return ki_data
 
+    async def get_a(self, start=0, end=1, step=1):
+        # get Fredricksburg A index
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                self.base_url + "predicted_fredericksburg_a_index.json"
+            ) as response:
+                data = await response.json()
+                data_range = slice(start, end, step)
+                a_data = {
+                    "a_index_data": {
+                        "a_index": float(item["afred_1_day"]),
+                        "a_2_day_index": float(item["afred_2_day"]),
+                        "a_3_day_index": float(item["afred_3_day"]),
+                        "timestamp": item["date"],
+                    }
+                    for item in data[data_range]
+                }
+
+        return a_data
+
     async def get_ssn(self, start=0, end=1, step=1):
         # get smoothed sunspot number
         async with aiohttp.ClientSession() as session:
@@ -112,6 +132,7 @@ class Runner:
             self.get_kp(),
             self.get_probabilities(),
             self.get_ssn(),
+            self.get_a(),
         )
         data = {}
         for _dict in standard_group:
