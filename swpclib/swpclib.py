@@ -11,7 +11,7 @@ class Runner:
 
     async def get_sfi(self, start=0, end=1, step=1):
         # get solar flux index
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(conn_timeout=10) as session:
             async with session.get(
                 self.base_url + "f107_cm_flux.json"
             ) as response:
@@ -19,7 +19,7 @@ class Runner:
                 data_range = slice(start, end, step)
                 sfi_data = {
                     "sfi_data": {
-                        "sfi": float(item["flux"]),
+                        "sfi": float(item["flux"] or float("-1")),
                         "timestamp": item["time_tag"],
                     }
                     for item in data[data_range]
@@ -29,7 +29,7 @@ class Runner:
 
     async def get_ki(self, start=0, end=1, step=1):
         # get boulder K index
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(conn_timeout=10) as session:
             async with session.get(
                 self.base_url + "boulder_k_index_1m.json"
             ) as response:
@@ -47,7 +47,7 @@ class Runner:
 
     async def get_a(self, start=0, end=1, step=1):
         # get Fredricksburg A index
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(conn_timeout=10) as session:
             async with session.get(
                 self.base_url + "predicted_fredericksburg_a_index.json"
             ) as response:
@@ -67,7 +67,7 @@ class Runner:
 
     async def get_ssn(self, start=0, end=1, step=1):
         # get smoothed sunspot number
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(conn_timeout=10) as session:
             async with session.get(
                 self.base_url + "solar-cycle/sunspots-smoothed.json"
             ) as response:
@@ -96,7 +96,7 @@ class Runner:
 
     async def get_kp(self, start=0, end=1, step=1):
         # get planetary k index
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(conn_timeout=10) as session:
             async with session.get(
                 self.base_url + "planetary_k_index_1m.json"
             ) as response:
@@ -114,7 +114,7 @@ class Runner:
 
     async def get_probabilities(self, start=0, end=1, step=1):
         # get solar event probabilities
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(conn_timeout=10) as session:
             async with session.get(
                 self.base_url + "solar_probabilities.json"
             ) as response:
