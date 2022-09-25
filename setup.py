@@ -16,6 +16,6 @@ if __name__ == "__main__":
         long_description=long_description,
         long_description_content_type="text/markdown",
         tests_require=test_requirements,
-        install_requires=["aiohttp==3.8.3"],
+        install_requires=["aiohttp>=3.8.1"],
         name="swpclib",
     )
