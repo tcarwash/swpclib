@@ -1,6 +1,6 @@
 import asyncio
 import aiohttp
-import alerts
+from . import alerts
 
 base_url = "https://services.swpc.noaa.gov/"
 
@@ -25,7 +25,7 @@ class Runner:
         """get solar flux index"""
 
         try:
-            data = await self.get_data_method("json/")
+            data = await self.get_data_method("json/f107_cm_flux.json")
             data_range = slice(start, end, step)
             sfi_data = {
                 "sfi_data": {
@@ -44,21 +44,15 @@ class Runner:
         """get boulder K index"""
 
         try:
-            async with aiohttp.ClientSession(
-                timeout=aiohttp.ClientTimeout(total=20.0)
-            ) as session:
-                async with session.get(
-                    self.base_url + "json/boulder_k_index_1m.json"
-                ) as response:
-                    data = await response.json()
-                    data_range = slice(start, end, step)
-                    ki_data = {
-                        "k_index_data": {
-                            "k_index": float(item["k_index"]),
-                            "timestamp": item["time_tag"],
-                        }
-                        for item in data[data_range]
-                    }
+            data = await self.get_data_method("json/boulder_k_index_1m.json")
+            data_range = slice(start, end, step)
+            ki_data = {
+                "k_index_data": {
+                    "k_index": float(item["k_index"]),
+                    "timestamp": item["time_tag"],
+                }
+                for item in data[data_range]
+            }
         except Exception as e:
             print(repr(e))
             ki_data = {"ki_data": None}
@@ -69,24 +63,19 @@ class Runner:
         """get Fredricksburg A index"""
 
         try:
-            async with aiohttp.ClientSession(
-                timeout=aiohttp.ClientTimeout(total=20.0)
-            ) as session:
-                async with session.get(
-                    self.base_url
-                    + "json/predicted_fredericksburg_a_index.json"
-                ) as response:
-                    data = await response.json()
-                    data_range = slice(start, end, step)
-                    a_data = {
-                        "a_index_data": {
-                            "a_index": float(item["afred_1_day"]),
-                            "a_2_day_index": float(item["afred_2_day"]),
-                            "a_3_day_index": float(item["afred_3_day"]),
-                            "timestamp": item["date"],
-                        }
-                        for item in data[data_range]
-                    }
+            data = await self.get_data_method(
+                "json/predicted_fredericksburg_a_index.json"
+            )
+            data_range = slice(start, end, step)
+            a_data = {
+                "a_index_data": {
+                    "a_index": float(item["afred_1_day"]),
+                    "a_2_day_index": float(item["afred_2_day"]),
+                    "a_3_day_index": float(item["afred_3_day"]),
+                    "timestamp": item["date"],
+                }
+                for item in data[data_range]
+            }
         except Exception as e:
             print(repr(e))
             a_data = {"a_data": None}
@@ -97,32 +86,28 @@ class Runner:
         """get smoothed sunspot number"""
 
         try:
-            async with aiohttp.ClientSession(
-                timeout=aiohttp.ClientTimeout(total=20.0)
-            ) as session:
-                async with session.get(
-                    self.base_url + "json/solar-cycle/sunspots-smoothed.json"
-                ) as response:
-                    data = await response.json()
-                    data_range = slice(start, end, step)
-                    ssn_data = {
-                        "smoothed_ssn_data": {
-                            "smoothed_ssn": float(item["smoothed_ssn"]),
-                            "timestamp": item["time-tag"],
-                        }
-                        for item in data[data_range]
-                    }
-                    if ssn_data["smoothed_ssn_data"]["smoothed_ssn"] == -1:
-                        last = -1
-                        for item in data:
-                            last = item["smoothed_ssn"]
-                            last_timestamp = item["time-tag"]
-                            if last != -1:
-                                break
-                        ssn_data["smoothed_ssn_data"]["last_ssn"] = {
-                            "smoothed_ssn": last,
-                            "timestamp": last_timestamp,
-                        }
+            data = await self.get_data_method(
+                "json/solar-cycle/sunspots-smoothed.json"
+            )
+            data_range = slice(start, end, step)
+            ssn_data = {
+                "smoothed_ssn_data": {
+                    "smoothed_ssn": float(item["smoothed_ssn"]),
+                    "timestamp": item["time-tag"],
+                }
+                for item in data[data_range]
+            }
+            if ssn_data["smoothed_ssn_data"]["smoothed_ssn"] == -1:
+                last = -1
+                for item in data:
+                    last = item["smoothed_ssn"]
+                    last_timestamp = item["time-tag"]
+                    if last != -1:
+                        break
+                ssn_data["smoothed_ssn_data"]["last_ssn"] = {
+                    "smoothed_ssn": last,
+                    "timestamp": last_timestamp,
+                }
         except Exception as e:
             print(repr(e))
             ssn_data = {"ssn_data": None}
@@ -133,21 +118,15 @@ class Runner:
         """get planetary k index"""
 
         try:
-            async with aiohttp.ClientSession(
-                timeout=aiohttp.ClientTimeout(total=20.0)
-            ) as session:
-                async with session.get(
-                    self.base_url + "json/planetary_k_index_1m.json"
-                ) as response:
-                    data = await response.json()
-                    data_range = slice(start, end, step)
-                    kp_data = {
-                        "kp_index_data": {
-                            "kp_index": float(item["kp_index"]),
-                            "timestamp": item["time_tag"],
-                        }
-                        for item in data[data_range]
-                    }
+            data = await self.get_data_method("json/planetary_k_index_1m.json")
+            data_range = slice(start, end, step)
+            kp_data = {
+                "kp_index_data": {
+                    "kp_index": float(item["kp_index"]),
+                    "timestamp": item["time_tag"],
+                }
+                for item in data[data_range]
+            }
         except Exception as e:
             print(repr(e))
             kp_data = {"kp_data": None}
@@ -158,19 +137,11 @@ class Runner:
         """get solar event probabilities"""
 
         try:
-            async with aiohttp.ClientSession(
-                timeout=aiohttp.ClientTimeout(total=20.0)
-            ) as session:
-                async with session.get(
-                    self.base_url + "json/solar_probabilities.json"
-                ) as response:
-                    data = await response.json()
-                    data_range = slice(start, end, step)
-                    probabilities_data = {
-                        "probabilities_data": [
-                            item for item in data[data_range]
-                        ]
-                    }
+            data = await self.get_data_method("json/solar_probabilities.json")
+            data_range = slice(start, end, step)
+            probabilities_data = {
+                "probabilities_data": [item for item in data[data_range]]
+            }
         except Exception as e:
             print(repr(e))
             probabilities_data = {"probabilities_data": None}
@@ -181,19 +152,12 @@ class Runner:
         """Returns solar weather alerts"""
 
         try:
-            async with aiohttp.ClientSession(
-                timeout=aiohttp.ClientTimeout(total=20.0)
-            ) as session:
-                async with session.get(
-                    self.base_url + "products/alerts.json"
-                ) as response:
-                    data = await response.json()
-                    data_range = slice(start, end, step)
-                    alerts_data = [
-                        alerts.format_message(alert)
-                        for alert in data[data_range]
-                    ]
-                    alerts_data = {"alerts": alerts_data}
+            data = await self.get_data_method("products/alerts.json")
+            data_range = slice(start, end, step)
+            alerts_data = [
+                alerts.format_message(alert) for alert in data[data_range]
+            ]
+            alerts_data = {"alerts": alerts_data}
         except Exception as e:
             print(repr(e))
             alerts_data = {"alerts": None}
