@@ -148,16 +148,25 @@ class Runner:
 
         return probabilities_data
 
-    async def get_alerts(self, start=0, end=1, step=1):
+    async def get_alerts(self, start=0, end=3, step=1):
         """Returns solar weather alerts"""
 
         try:
             data = await self.get_data_method("products/alerts.json")
             data_range = slice(start, end, step)
-            alerts_data = [
-                alerts.format_message(alert) for alert in data[data_range]
-            ]
+            alerts_data = []
+            active = False
+            for alert in data[data_range]:
+                try:
+                    a = alerts.format_message(alert)
+                    if "active" in a:
+                        active = True
+                    alerts_data.append(a)
+                except Exception as e:
+                    print(repr(e))
             alerts_data = {"alerts": alerts_data}
+            if active:
+                alerts_data["active"] = True
         except Exception as e:
             print(repr(e))
             alerts_data = {"alerts": None}
@@ -165,6 +174,8 @@ class Runner:
         return alerts_data
 
     async def get_standard(self, start=0, end=1, step=1):
+        """return standard output"""
+
         try:
             standard_group = await asyncio.gather(
                 self.get_sfi(),
