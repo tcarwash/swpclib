@@ -121,7 +121,7 @@ def parse_message(output):
         alert_string += output["watch"] + "\n"
     if "valid_from" in output:
         alert_string += (
-            f"From: {output['valid_from']} --> {output['valid_until']}\n"
+            f"From: {output['valid_from']} --> {output.get('valid_until')}\n"
         )
     if "synoptic_period" in output:
         alert_string += f"Synoptic Period: {output['synoptic_period']}\n"

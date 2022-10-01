@@ -83,31 +83,21 @@ class Runner:
         return a_data
 
     async def get_ssn(self, start=0, end=1, step=1):
-        """get smoothed sunspot number"""
+        """get observed sunspot number"""
 
         try:
             data = await self.get_data_method(
-                "json/solar-cycle/sunspots-smoothed.json"
+                "json/solar-cycle/swpc_observed_ssn.json"
             )
             data_range = slice(start, end, step)
+            data.reverse()
             ssn_data = {
-                "smoothed_ssn_data": {
-                    "smoothed_ssn": float(item["smoothed_ssn"]),
-                    "timestamp": item["time-tag"],
+                "ssn_data": {
+                    "ssn": float(item["swpc_ssn"]),
+                    "timestamp": item["Obsdate"],
                 }
                 for item in data[data_range]
             }
-            if ssn_data["smoothed_ssn_data"]["smoothed_ssn"] == -1:
-                last = -1
-                for item in data:
-                    last = item["smoothed_ssn"]
-                    last_timestamp = item["time-tag"]
-                    if last != -1:
-                        break
-                ssn_data["smoothed_ssn_data"]["last_ssn"] = {
-                    "smoothed_ssn": last,
-                    "timestamp": last_timestamp,
-                }
         except Exception as e:
             print(repr(e))
             ssn_data = {"ssn_data": None}
