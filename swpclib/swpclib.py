@@ -168,11 +168,11 @@ class Runner:
 
         try:
             standard_group = await asyncio.gather(
-                self.get_sfi(),
-                self.get_kp(),
-                self.get_probabilities(),
-                self.get_ssn(),
-                self.get_a(),
+                self.get_sfi(start, end, step),
+                self.get_kp(start, end, step),
+                self.get_probabilities(start, end, step),
+                self.get_ssn(start, end, step),
+                self.get_a(start, end, step),
                 self.get_alerts(),
             )
             data = {}
