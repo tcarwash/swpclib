@@ -109,6 +109,7 @@ class Runner:
 
         try:
             data = await self.get_data_method("json/planetary_k_index_1m.json")
+            data.reverse()
             data_range = slice(start, end, step)
             kp_data = {
                 "kp_index_data": {
