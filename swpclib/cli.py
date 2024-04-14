@@ -56,7 +56,6 @@ async def get_animations(urls):
 @click.option('--name', help="Name used for filename creation")
 def animations(group=None, product=None, name=None):
     if group and group in urls.keys():
-        group = sys.argv[1]
         url_group = urls.get(group, [])
         print(f"Generating {len(url_group)} animations for group: {group}")
         asyncio.run(get_animations(url_group))
