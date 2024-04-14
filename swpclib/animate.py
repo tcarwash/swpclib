@@ -7,10 +7,10 @@ def NOW():
     return datetime.now(UTC).strftime('%Y%m%d%H%M%S')
 
 async def create_gif(frames: list) -> bytes:
-    pil_frames = [Image.open(BytesIO(image)) for image in frames]
+    pil_frames = [Image.open(BytesIO(image)).convert("RGB") for image in frames]
     frame_one = pil_frames[0]
     image_bytes = BytesIO()
-    frame_one.save(image_bytes, format="GIF", append_images=pil_frames, save_all=True, duration=200, loop=0)
+    frame_one.save(image_bytes, format="GIF", append_images=pil_frames, save_all=True, optimize=False, duration=200, loop=0)
 
     return image_bytes.getbuffer()
 
