@@ -1,5 +1,5 @@
 """Console script for swpclib."""
-import argparse
+import click
 import sys
 from . import swpclib
 import asyncio
@@ -26,6 +26,7 @@ urls = {
         ('/products/animations/suvi-primary-195.json', 'goes_195'),
         ('/products/animations/suvi-primary-304.json', 'goes_304'),
         ('/products/animations/suvi-primary-map.json', 'suvi-map'),
+        ('/products/animations/sdo-hmii.json', 'sdo-hmii')
     ],
     'graphs': [
         ('/products/animations/d-rap_f15_global.json', 'd-rap_f15'),
@@ -49,25 +50,26 @@ async def get_animations(urls):
     swpc = swpclib.Runner()
     await asyncio.gather(*[swpc.gen_gif(endpoint=url[0], name=url[1], write=True) for url in urls], return_exceptions=False)
 
-def animations():
-    if len(sys.argv) > 1 and sys.argv[1] in urls.keys():
+@click.command()
+@click.option('--group', help="Group of images to generate")
+@click.option('--product', help="A swpc product endpoint that is a list of animation frames")
+@click.option('--name', help="Name used for filename creation")
+def animations(group=None, product=None, name=None):
+    if group and group in urls.keys():
         group = sys.argv[1]
         url_group = urls.get(group, [])
         print(f"Generating {len(url_group)} animations for group: {group}")
         asyncio.run(get_animations(url_group))
-    else:
-        if group:
+    elif group:
             print(f"{group} is not a valid group. valid groups are: {[group for group in urls.keys()]}")
-        else:
-            print(f"Must provide a valid group. valid groups are: {[group for group in urls.keys()]}")
+    elif product and name:
+        print(f"Generating animation for: {name}")
+        asyncio.run(get_animations([(product, name)]))
 
 
+@click.command()
 def space_weather():
     """Console script for swpclib."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("_", nargs="*")
-    args = parser.parse_args()
-
     runner = swpclib.Runner()
     data = asyncio.run(runner.get_standard())
     string = f"""\n{bcolors.OKBLUE}Current Space Weather:{bcolors.ENDC}
