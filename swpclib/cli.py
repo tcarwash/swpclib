@@ -4,7 +4,6 @@ import sys
 from . import swpclib
 import asyncio
 
-
 class bcolors:
     HEADER = "\033[95m"
     OKBLUE = "\033[94m"
@@ -16,8 +15,54 @@ class bcolors:
     BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
 
+''' 
+A dictionary of URL groups, keys of this dict are assumed to be names of valid groups to generate animations from
+values should be a list of tuples where the 0th element is the url of the swpc endpoint, and the 1st element is a 
+filename excluding the file extension, which will always be .gif
+'''
+urls = {
+    'solar_images': [
+        ('/products/animations/suvi-primary-094.json', 'goes_094'),
+        ('/products/animations/suvi-primary-195.json', 'goes_195'),
+        ('/products/animations/suvi-primary-304.json', 'goes_304'),
+        ('/products/animations/suvi-primary-map.json', 'suvi-map'),
+    ],
+    'graphs': [
+        ('/products/animations/d-rap_f15_global.json', 'd-rap_f15'),
+        ('/products/animations/wam-ipe/wfs_ionosphere_new.json', 'global_ionosphere')
+    ],
+    'cme': [
+        ('/products/animations/lasco-c2.json', 'lasco-c2'),
+        ('/products/animations/lasco-c3.json', 'lasco-c3'),
+    ],
 
-def main():
+    'aurora': [
+        ('/products/animations/ovation_north_24h.json', 'ovation_north'),
+        ('/products/animations/ovation_south_24h.json', 'ovation_south'),
+    ],
+    'geomagnetic': [
+        ('/products/animations/geoelectric/US-Canada-1D.json', 'geomagnetic_north_america'),
+    ],
+}
+
+async def get_animations(urls):
+    swpc = swpclib.Runner()
+    await asyncio.gather(*[swpc.gen_gif(endpoint=url[0], name=url[1], write=True) for url in urls], return_exceptions=False)
+
+def animations():
+    if len(sys.argv) > 1 and sys.argv[1] in urls.keys():
+        group = sys.argv[1]
+        url_group = urls.get(group, [])
+        print(f"Generating {len(url_group)} animations for group: {group}")
+        asyncio.run(get_animations(url_group))
+    else:
+        if group:
+            print(f"{group} is not a valid group. valid groups are: {[group for group in urls.keys()]}")
+        else:
+            print(f"Must provide a valid group. valid groups are: {[group for group in urls.keys()]}")
+
+
+def space_weather():
     """Console script for swpclib."""
     parser = argparse.ArgumentParser()
     parser.add_argument("_", nargs="*")
@@ -53,4 +98,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+    sys.exit(space_weather())  # pragma: no cover

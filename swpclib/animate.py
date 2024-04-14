@@ -1,6 +1,7 @@
 from PIL import Image
 from io import BytesIO
 import asyncio
+from datetime import datetime
 
 async def create_gif(frames: list) -> bytes:
     pil_frames = [Image.open(BytesIO(image)) for image in frames]
@@ -13,9 +14,10 @@ async def create_gif(frames: list) -> bytes:
 async def write_gif(frames: list, name: str) -> bytes:
     try:
         image_bytes = await create_gif(frames)
-
-        with open(f'{name}.gif', 'wb') as f:
+        filename = f'{name}.gif'
+        with open(filename, 'wb') as f:
             f.write(image_bytes)
+        print(f'wrote {filename}')
     except Exception as e:
         raise e
 
