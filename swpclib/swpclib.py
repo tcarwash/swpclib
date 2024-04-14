@@ -1,8 +1,9 @@
 import asyncio
 import aiohttp
 from . import alerts
+from .animate import create_gif, write_gif
 
-base_url = "https://services.swpc.noaa.gov/"
+base_url = "https://services.swpc.noaa.gov"
 
 
 class Runner:
@@ -21,11 +22,37 @@ class Runner:
 
         return result
 
+    async def get_bytes_method(self, url: str) -> bytes:
+        try:
+            async with asyncio.Semaphore(5):
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(self.base_url + url) as response:
+                        result = await response.content.read()
+        except Exception as e:
+            raise e
+
+        return result
+
+    async def fetch_all(self, urls: list, method) -> list:
+        results = await asyncio.gather(*[method(url) for url in urls], return_exceptions=False)
+        return results
+
+    async def gen_gif(self, endpoint: str, name = None, write: bool = False) -> bytes: 
+        resp = await self.get_data_method(endpoint)
+        urls = [frame['url'] for frame in resp]
+        frames = await self.fetch_all(urls, self.get_bytes_method)
+        if write:
+            gif = await write_gif(frames, name) 
+        else:
+            gif = await create_gif(frames) 
+
+        return gif
+
     async def get_sfi(self, start=0, end=1, step=1):
         """get solar flux index"""
 
         try:
-            data = await self.get_data_method("json/f107_cm_flux.json")
+            data = await self.get_data_method("/json/f107_cm_flux.json")
             data_range = slice(start, end, step)
             sfi_data = {
                 "sfi_data": {
@@ -44,7 +71,7 @@ class Runner:
         """get boulder K index"""
 
         try:
-            data = await self.get_data_method("json/boulder_k_index_1m.json")
+            data = await self.get_data_method("/json/boulder_k_index_1m.json")
             data_range = slice(start, end, step)
             ki_data = {
                 "k_index_data": {
@@ -64,7 +91,7 @@ class Runner:
 
         try:
             data = await self.get_data_method(
-                "json/predicted_fredericksburg_a_index.json"
+                "/json/predicted_fredericksburg_a_index.json"
             )
             data_range = slice(start, end, step)
             a_data = {
@@ -82,12 +109,32 @@ class Runner:
 
         return a_data
 
+    async def get_goes_195_angstroms_animation(self, write: bool = False):
+        """Get 195 angstrom GOES image gif"""
+        return await self.gen_gif(endpoint="/products/animations/suvi-primary-195.json", name="goes_195", write=write)
+
+    async def get_goes_304_angstroms_animation(self, write: bool = False):
+        """Get 304 angstrom GOES image gif"""
+        return await self.gen_gif(endpoint="/products/animations/suvi-secondary-304.json", name="goes_304", write=write)
+
+    async def get_goes_094_angstroms_animation(self, write: bool = False):
+        """Get 094 angstrom GOES image gif"""
+        return await self.gen_gif(endpoint="/products/animations/suvi-secondary-094.json", name="goes_094", write=write)
+
+    async def get_ovation_north_24h_animation(self, write: bool = False):
+        """Get Ovation Northern Hemisphere gif"""
+        return await self.gen_gif(endpoint="/products/animations/ovation_north_24h.json", name="ovation_north", write=write)
+
+    async def get_ovation_south_24h_animation(self, write: bool = False):
+        """Get Ovation Southern Hemisphere gif"""
+        return await self.gen_gif(endpoint="/products/animations/ovation_south_24h.json", name="ovation_south", write=write)
+
     async def get_ssn(self, start=0, end=1, step=1):
         """get observed sunspot number"""
 
         try:
             data = await self.get_data_method(
-                "json/solar-cycle/swpc_observed_ssn.json"
+                "/json/solar-cycle/swpc_observed_ssn.json"
             )
             data_range = slice(start, end, step)
             data.reverse()
@@ -108,7 +155,8 @@ class Runner:
         """get planetary k index"""
 
         try:
-            data = await self.get_data_method("json/planetary_k_index_1m.json")
+            data = await self.get_data_method("/json/planetary_k_index_1m.json")
+            data.reverse()
             data_range = slice(start, end, step)
             kp_data = {
                 "kp_index_data": {
@@ -127,7 +175,7 @@ class Runner:
         """get solar event probabilities"""
 
         try:
-            data = await self.get_data_method("json/solar_probabilities.json")
+            data = await self.get_data_method("/json/solar_probabilities.json")
             data_range = slice(start, end, step)
             probabilities_data = {
                 "probabilities_data": [item for item in data[data_range]]
@@ -142,7 +190,7 @@ class Runner:
         """Returns solar weather alerts"""
 
         try:
-            data = await self.get_data_method("products/alerts.json")
+            data = await self.get_data_method("/products/alerts.json")
             data_range = slice(start, end, step)
             alerts_data = []
             active = False
@@ -168,11 +216,11 @@ class Runner:
 
         try:
             standard_group = await asyncio.gather(
-                self.get_sfi(),
-                self.get_kp(),
-                self.get_probabilities(),
-                self.get_ssn(),
-                self.get_a(),
+                self.get_sfi(start, end, step),
+                self.get_kp(start, end, step),
+                self.get_probabilities(start, end, step),
+                self.get_ssn(start, end, step),
+                self.get_a(start, end, step),
                 self.get_alerts(),
             )
             data = {}
