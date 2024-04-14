@@ -5,9 +5,9 @@
 name: Build Python Package
 
 on:
-  release:
-    types: [published]
-
+  push:
+    tags:
+      - v*
 jobs:
   test:
     runs-on: ubuntu-latest
