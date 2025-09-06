@@ -73,11 +73,11 @@ def space_weather():
     data = asyncio.run(runner.get_standard())
     string = f"""\n{bcolors.OKBLUE}Current Space Weather:{bcolors.ENDC}
 
-\tSFI: {data.get('sfi_data', {}).get('sfi')}
-\tKP Index: {data.get('kp_index_data', {}).get('kp_index')}
-\tA Index: {data['a_index_data']['a_index']}
-\tSunspot Number: {data.get("ssn_data",{}).get("ssn")}
-\tX-Class Probability: {data.get('probabilities_data',{})[0].get('x_class_1_day')}
+	SFI: {data.get('sfi_data', {}).get('sfi')}
+	KP Index: {data.get('kp_index_data', {}).get('estimated_kp', data.get('kp_index_data', {}).get('kp_index'))}
+	A Index: {data['a_index_data']['a_index']}
+	Sunspot Number: {data.get("ssn_data",{}).get("ssn")}
+	X-Class Probability: {data.get('probabilities_data',{})[0].get('x_class_1_day')}
     """
     print(string)
     alerts = [alert for alert in data["alerts"]]

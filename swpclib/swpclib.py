@@ -158,9 +158,13 @@ class Runner:
             data = await self.get_data_method("/json/planetary_k_index_1m.json")
             data.reverse()
             data_range = slice(start, end, step)
+            # include both the reported integer kp_index and the fractional
+            # estimated_kp (when present) so callers can choose which to use.
             kp_data = {
                 "kp_index_data": {
-                    "kp_index": float(item["kp_index"]),
+                    "kp_index": float(item["kp_index"]) if item.get("kp_index") is not None else None,
+                    "estimated_kp": float(item.get("estimated_kp", item.get("kp_index"))) if (item.get("estimated_kp") is not None or item.get("kp_index") is not None) else None,
+                    "kp": item.get("kp"),
                     "timestamp": item["time_tag"],
                 }
                 for item in data[data_range]
